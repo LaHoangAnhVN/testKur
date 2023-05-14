@@ -59,12 +59,13 @@ def mean_set(input_set: []):
 
 
 class Neural:
-    def __init__(self, id: int, k: []):
+    def __init__(self, id: int, input_data: [], k: []):
         self.id = id
+        self.input_data = input_data
         self.k = k
 
-    def get_output(self, input_data: []):
-        return [input_data[0] * self.k[0], input_data[1] * self.k[1]]
+    def get_output(self):
+        return [self.input_data[0] * self.k[0], self.input_data[1] * self.k[1]]
 
 
 class Edge:
@@ -79,6 +80,14 @@ class Neural_network:
         self.list_neural = list_neural.copy()
         self.list_edges = list_edges.copy()
         self.learning_rate = learning_rate
+
+    def copy(self):
+        list_new_neural = []
+        list_new_edges = []
+        for i in self.list_neural:
+            list_neural_i = []
+            for j in i:
+                new_neural = Neural(j.id, )
 
     def get_output(self, input_para):
         for i in self.list_neural:
@@ -516,10 +525,10 @@ def progress_training(neural_net: Neural_network, condition=None, k=None):
 #               Edge(5, 6, np.array([random.random(), random.random()])),
 #               Edge(5, 7, np.array([random.random(), random.random()]))]]
 
-list_Neural = [[Neural(i, np.array([random.random(), random.random()])) for i in range(1, 4)],
-               [Neural(i, np.array([random.random(), random.random()])) for i in range(4, 8)],
-               [Neural(i, np.array([random.random(), random.random()])) for i in range(8, 11)],
-               [Neural(i, np.array([random.random(), random.random()])) for i in range(11, 13)]]
+list_Neural = [[Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(1, 4)],
+               [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(4, 8)],
+               [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(8, 11)],
+               [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(11, 13)]]
 
 list_Edge = [[Edge(1, 4, np.array([random.random() - 1, random.random() + 1])), Edge(1, 5, np.array([random.random() - 1, random.random() + 1])),
               Edge(1, 6, np.array([random.random() - 1, random.random() + 1])), Edge(2, 4, np.array([random.random(), random.random()])),
