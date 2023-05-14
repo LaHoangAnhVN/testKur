@@ -59,20 +59,19 @@ def mean_set(input_set: []):
 
 
 class Neural:
-    def __init__(self, id: int, input_data: [], k: []):
+    def __init__(self, id: int, k: []):
         self.id = id
-        self.input_data = input_data.copy()
-        self.k = k.copy()
+        self.k = k
 
-    def get_output(self):
-        return [self.input_data[0] * self.k[0], self.input_data[1] * self.k[1]]
+    def get_output(self, input_data: []):
+        return [input_data[0] * self.k[0], input_data[1] * self.k[1]]
 
 
 class Edge:
     def __init__(self, left: int, right: int, weight: []):
         self.left = left
         self.right = right
-        self.weight = weight.copy()
+        self.weight = weight
 
 
 class Neural_network:
@@ -104,8 +103,7 @@ class Neural_network:
                 for k in range(len(list_neural_to_this_neural)):
                     j.input_data[0] += list_neural_to_this_neural[k].get_output()[0] *\
                                        list_edges_to_this_neural[k].weight[0]
-                    j.input_data[1] += list_neural_to_this_neural[k].get_output()[1] * \
-                                       list_edges_to_this_neural[k].weight[1]
+                    j.input_data[1] += list_neural_to_this_neural[k].get_output()[1] * list_edges_to_this_neural[k].weight[1]
 
         return [self.list_neural[-1][0].get_output()[0], self.list_neural[-1][1].get_output()[1]]
 
@@ -142,16 +140,20 @@ class Neural_network:
 
     def find_road(self, start_neural: Neural, last_neural: Neural):
         road = [[start_neural]]
+
         start_layer = self.find_layer(start_neural)
-        for i in range(start_layer, 2):
-            for j in range(len(road)):
-                k = len(road[0])
-                next_neural = self.find_right_neighbour_neural(road[0][k - 1])
-                for x in next_neural:
-                    copy = road[0].copy()
-                    copy.append(x)
-                    road.append(copy)
-                road.remove(road[0])
+        last_layer = self.find_layer(last_neural)
+        _actual_layer = start_layer
+        while _actual_layer < last_layer:
+            new_road = []
+            for i in road:
+                next_right = self.find_right_neighbour_neural(i[-1])
+                for j in next_right:
+                    i_copy = i.copy()
+                    i_copy.append(j)
+                    new_road.append(i_copy)
+            road = new_road
+            _actual_layer += 1
         result = []
         for i in road:
             if i[-1].id == last_neural.id:
@@ -161,22 +163,34 @@ class Neural_network:
     def get_loss_x1(self, input_para: []):
         expected_resolve = resolve_quadratic_equation(input_para)
         actual_resolve = self.get_output(input_para)
-        return (actual_resolve[0] - expected_resolve[0])**2
+        if abs(actual_resolve[0] - expected_resolve[0]) < (actual_resolve[0] - expected_resolve[0])**2:
+            return (actual_resolve[0] - expected_resolve[0])**2
+        else:
+            return abs(actual_resolve[0] - expected_resolve[0])
 
     def get_loss_x2(self, input_para: []):
         expected_resolve = resolve_quadratic_equation(input_para)
         actual_resolve = self.get_output(input_para)
-        return (actual_resolve[1] - expected_resolve[1]) ** 2
+        if abs(actual_resolve[1] - expected_resolve[1]) < (actual_resolve[1] - expected_resolve[1]) ** 2:
+            return (actual_resolve[1] - expected_resolve[1]) ** 2
+        else:
+            return abs(actual_resolve[1] - expected_resolve[1])
 
     def dl1_by_dx1(self, input_para: []):
         expected_resolve = resolve_quadratic_equation(input_para)
         actual_resolve = self.get_output(input_para)
-        return 2 * (actual_resolve[0] - expected_resolve[0])
+        if (actual_resolve[0] - expected_resolve[0])**2 > abs(actual_resolve[0] - expected_resolve[0]):
+            return 2 * (actual_resolve[0] - expected_resolve[0])
+        else:
+            return (actual_resolve[0] - expected_resolve[0])/(np.sqrt((actual_resolve[0] - expected_resolve[0])**2))
 
     def dl2_by_dx2(self, input_para: []):
         expected_resolve = resolve_quadratic_equation(input_para)
         actual_resolve = self.get_output(input_para)
-        return 2 * (actual_resolve[1] - expected_resolve[1])
+        if (actual_resolve[1] - expected_resolve[1]) ** 2 > abs(actual_resolve[1] - expected_resolve[1]):
+            return 2 * (actual_resolve[1] - expected_resolve[1])
+        else:
+            return (actual_resolve[1] - expected_resolve[1]) / (np.sqrt((actual_resolve[1] - expected_resolve[1]) ** 2))
 
     def dti1_by_dzi1(self, neural: Neural):
         return neural.k[0]
@@ -227,9 +241,7 @@ class Neural_network:
 
     def dl2_by_dw2(self, input_para: [], edge: Edge):
         next_neural = self.find_neural(edge.right)
-        print(next_neural.id)
         road = self.find_road(next_neural, self.find_neural(7))
-        print(len(road))
         result = 0
         for i in road:
             actual = self.dl2_by_dx2(input_para)
@@ -301,14 +313,6 @@ class Neural_network:
             dl1_by_dw1.append(actual_dl1_by_dw1)
             dl1_by_dk1.append(actual_dl1_by_dk1)
 
-            # if i == 1:
-            #     print('actual x1 = ', self.get_output(data_training[i])[0], 'actual x2 = ',
-            #           self.get_output(data_training[i])[1])
-            #     print('expected x1 = ', resolve_quadratic_equation(data_training[i])[0], 'expected x2 = ',
-            #           resolve_quadratic_equation(data_training[i])[1])
-            #     print(dl1_by_dw1)
-            #     print(dl1_by_dk1)
-
         mean_dl1_by_dw1 = mean_set(dl1_by_dw1)
         mean_dl1_by_dk1 = mean_set(dl1_by_dk1)
         mean_loss_before = sum(losses_before)/len(losses_before)
@@ -324,14 +328,14 @@ class Neural_network:
         losses_after = []
         for i in range(len(data_training)):
             losses_after.append(self.get_loss_x1(data_training[i]))
-            # print('actual x1 = ', self.get_output(data_training[i])[0], 'X1 = ', resolve_quadratic_equation(data_training[i])[0], 'loss = ', self.get_loss_x1(data_training[i]))
+
         mean_loss_after = sum(losses_after)/len(losses_after)
-        return mean_loss_after
+        return mean_loss_before, mean_loss_after
 
     def training_x2(self, data_training: []):
         expected_x2 = []
         for i in data_training:
-            expected_x2.append(resolve_quadratic_equation(data_training[i]))
+            expected_x2.append(resolve_quadratic_equation(i)[1])
         dl2_by_dw2 = []
         dl2_by_dk2 = []
         losses_before = []
@@ -368,35 +372,211 @@ class Neural_network:
             losses_after.append(self.get_loss_x2(data_training[i]))
 
         mean_loss_after = sum(losses_after)/len(losses_after)
-        return mean_loss_after
+        return mean_loss_before, mean_loss_after
+
+    def progress_training(self, condition=None, k=None):
+        data_training = np.loadtxt('data.txt', dtype=int)
+        list_mean_loss_x1 = []
+        list_mean_loss_x2 = []
+        min_neural = []
+        min_neural_x1 = []
+        min_edge_x1 = []
+        min_edge = []
+        list_network_x1 = []
+        min_edge = []
+        list_network_x2 = []
+        if k is None and condition is not None:
+            while True:
+                before_x1, after_x1 = self.training_x1(data_training)
+                before_x2, after_x2 = self.training_x2(data_training)
+                list_mean_loss_x1.append(after_x1)
+                list_mean_loss_x2.append(after_x2)
+                if after_x1 < before_x1:
+                    for i in range(len(self.list_neural)):
+                        for j in range(len(self.list_neural[i])):
+                            min_neural[i][j].k[0] = self.list_neural[i][j].k[0]
+                    for i in range(len(self.list_edges)):
+                        for j in range(len(self.list_edges[i])):
+                            min_edge[i][j].weight[0] = self.list_edges[i][j].weight[0]
+                if after_x2 < before_x2:
+                    for i in range(len(self.list_neural)):
+                        for j in range(len(self.list_neural[i])):
+                            min_neural[i][j].k[1] = self.list_neural[i][j].k[1]
+                    for i in range(len(self.list_edges)):
+                        for j in range(len(self.list_edges[i])):
+                            min_edge[i][j].weight[1] = self.list_edges[i][j].weight[1]
+                if abs(before_x2 - after_x2) < condition and abs(before_x1 - after_x1) < condition:
+                    break
+        else:
+            for x in range(k):
+                before_x1, after_x1 = self.training_x1(data_training)
+                list_mean_loss_x1.append(after_x1)
+                list_k1 = []
+                for i in self.list_neural:
+                    t1 = []
+                    for j in i:
+
+                        new_neural = Neural(j.id, [0, 0], j.k)
+                        t1.append(new_neural)
+                    list_k1.append(t1)
+                min_neural_x1.append(list_k1)
+                list_weight1 = []
+                for i in self.list_edges:
+                    t2 = []
+                    for j in i:
+                        new_edge = Edge(j.left, j.right, j.weight)
+                        t2.append(new_edge)
+                    list_weight1.append(t2)
+                min_edge_x1.append(list_weight1)
+
+                # if after_x1 < before_x1:
+                #     for i in range(len(self.list_neural)):
+                #         for j in range(len(self.list_neural[i])):
+                #             min_neural[i][j].k[0] = self.list_neural[i][j].k[0]
+                #     for i in range(len(self.list_edges)):
+                #         for j in range(len(self.list_edges[i])):
+                #             min_edge[i][j].weight[0] = self.list_edges[i][j].weight[0]
+            for x in range(k):
+                before_x2, after_x2 = self.training_x2(data_training)
+                list_mean_loss_x2.append(after_x2)
+                list_network_x2.append(self)
+
+            a = [1, -12, 35]
+            test_1 = Neural_network(min_neural_x1[10], min_edge_x1[10], self.learning_rate)
+            test_2 = Neural_network(min_neural_x1[50], min_edge_x1[50], self.learning_rate)
+            print(test_1.get_output(a))
+            print(test_2.get_output(a))
+
+            # min_x1 = min(list_mean_loss_x1)
+            # min_index_x1 = list_mean_loss_x1.index(min_x1)
+            # new_network = list_network_x1[min_index_x1]
+            # a = [1, -12, 35]
+            # print(new_network.get_output(a))
+
+            # for i in range(len(list_mean_loss_x1)):
+            #     if list_mean_loss_x1[i] == min(list_mean_loss_x1)
+                # if after_x2 < before_x2:
+                #     for i in range(len(self.list_neural)):
+                #         for j in range(len(self.list_neural[i])):
+                #             min_neural[i][j].k[1] = self.list_neural[i][j].k[1]
+                #     for i in range(len(self.list_edges)):
+                #         for j in range(len(self.list_edges[i])):
+                #             min_edge[i][j].weight[1] = self.list_edges[i][j].weight[1]
+
+        # plt.subplot(121)
+        # plt.title('График средней ошибок по x1')
+        # x = np.arange(0, len(list_mean_loss_x1), 1)
+        # plt.plot(x, list_mean_loss_x1)
+        #
+        # plt.subplot(122)
+        # plt.title('График средней ошибок по x2')
+        # x = np.arange(0, len(list_mean_loss_x2), 1)
+        # plt.plot(x, list_mean_loss_x2)
+        # plt.show()
+
+        return Neural_network(min_neural, min_edge, self.learning_rate)
 
 
-list_Neural = [
-            [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(1, 4)],
-            [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(4, 6)],
-            [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(6, 8)]]
-list_Edge = [[Edge(1, 4, np.array([random.random(), random.random()])),
-              Edge(1, 5, np.array([random.random(), random.random()])),
-              Edge(2, 5, np.array([random.random(), random.random()])),
-              Edge(3, 4, np.array([random.random(), random.random()])),
-              Edge(3, 5, np.array([random.random(), random.random()]))],
-             [Edge(4, 6, np.array([random.random(), random.random()])),
-              Edge(5, 6, np.array([random.random(), random.random()])),
-              Edge(5, 7, np.array([random.random(), random.random()]))]]
+def progress_training(neural_net: Neural_network, condition=None, k=None):
+    data_training = np.loadtxt('data.txt', dtype=int)
+    list_mean_lost_x1 = []
+    list_mean_lost_x2 = []
+    min_neural = []
+    min_neural_x1 = []
+    min_edge_x1 = []
+    min_edge = []
+    list_network_x1 = []
+    min_edge = []
+    list_network_x2 = []
 
-a = [1, -3, 2]
+    list_network_x1.append(neural_net)
+
+    neural_net.training_x1(data_training)
+    list_network_x1.append(neural_net)
+
+    print(list_network_x1[0].get_output([1, -3, 2]))
+    print(list_network_x1[1].get_output([1, -3, 2]))
+
+    # if k is None and condition is not None:
+    #     while True:
+
+
+
+
+# list_Neural = [
+#             [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(1, 4)],
+#             [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(4, 6)],
+#             [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(6, 8)]]
+# list_Edge = [[Edge(1, 4, np.array([random.random(), random.random()])),
+#               Edge(1, 5, np.array([random.random(), random.random()])),
+#               Edge(2, 5, np.array([random.random(), random.random()])),
+#               Edge(3, 4, np.array([random.random(), random.random()])),
+#               Edge(3, 5, np.array([random.random(), random.random()]))],
+#              [Edge(4, 6, np.array([random.random(), random.random()])),
+#               Edge(5, 6, np.array([random.random(), random.random()])),
+#               Edge(5, 7, np.array([random.random(), random.random()]))]]
+
+list_Neural = [[Neural(i, np.array([random.random(), random.random()])) for i in range(1, 4)],
+               [Neural(i, np.array([random.random(), random.random()])) for i in range(4, 8)],
+               [Neural(i, np.array([random.random(), random.random()])) for i in range(8, 11)],
+               [Neural(i, np.array([random.random(), random.random()])) for i in range(11, 13)]]
+
+list_Edge = [[Edge(1, 4, np.array([random.random() - 1, random.random() + 1])), Edge(1, 5, np.array([random.random() - 1, random.random() + 1])),
+              Edge(1, 6, np.array([random.random() - 1, random.random() + 1])), Edge(2, 4, np.array([random.random(), random.random()])),
+              Edge(2, 6, np.array([random.random(), random.random()])), Edge(2, 7, np.array([random.random(), random.random()])),
+              Edge(3, 5, np.array([random.random(), random.random()])), Edge(3, 6, np.array([random.random(), random.random()])),
+              Edge(3, 7, np.array([random.random(), random.random()]))],
+             [Edge(4, 8, np.array([random.random(), random.random()])), Edge(4, 10, np.array([random.random(), random.random()])),
+              Edge(5, 8, np.array([random.random(), random.random()])), Edge(5, 9, np.array([random.random(), random.random()])),
+              Edge(6, 8, np.array([random.random(), random.random()])), Edge(6, 9, np.array([random.random(), random.random()])),
+              Edge(6, 10, np.array([random.random(), random.random()])), Edge(7, 9, np.array([random.random(), random.random()])),
+              Edge(7, 10, np.array([random.random(), random.random()]))],
+             [Edge(8, 11, np.array([random.random(), random.random()])), Edge(8, 12, np.array([random.random(), random.random()])),
+              Edge(9, 12, np.array([random.random(), random.random()])), Edge(10, 11, np.array([random.random(), random.random()])),
+              Edge(10, 12, np.array([random.random(), random.random()]))]]
+#
+# list_Neural = [[Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(1, 4)],
+#                [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(4, 7)],
+#                [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(7, 11)],
+#                [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(11, 14)],
+#                [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(14, 16)]]
+#
+# list_Edge = [[Edge(1, 4, np.array([random.random(), random.random()])), Edge(1, 5, np.array([random.random(), random.random()])),
+#               Edge(1, 6, np.array([random.random(), random.random()])), Edge(2, 4, np.array([random.random(), random.random()])),
+#               Edge(2, 6, np.array([random.random(), random.random()])), Edge(3, 4, np.array([random.random(), random.random()])),
+#               Edge(3, 5, np.array([random.random(), random.random()]))],
+#              [Edge(4, 7, np.array([random.random(), random.random()])), Edge(4, 8, np.array([random.random(), random.random()])),
+#               Edge(4, 9, np.array([random.random(), random.random()])), Edge(4, 10, np.array([random.random(), random.random()])),
+#               Edge(5, 7, np.array([random.random(), random.random()])), Edge(5, 8, np.array([random.random(), random.random()])),
+#               Edge(6, 7, np.array([random.random(), random.random()])), Edge(6, 8, np.array([random.random(), random.random()])),
+#               Edge(6, 9, np.array([random.random(), random.random()])), Edge(6, 10, np.array([random.random(), random.random()]))],
+#              [Edge(7, 11, np.array([random.random(), random.random()])), Edge(7, 12, np.array([random.random(), random.random()])),
+#               Edge(7, 13, np.array([random.random(), random.random()])), Edge(8, 11, np.array([random.random(), random.random()])),
+#               Edge(8, 12, np.array([random.random(), random.random()])), Edge(9, 11, np.array([random.random(), random.random()])),
+#               Edge(9, 12, np.array([random.random(), random.random()])), Edge(9, 13, np.array([random.random(), random.random()])),
+#               Edge(10, 12, np.array([random.random(), random.random()])), Edge(10, 13, np.array([random.random(), random.random()]))],
+#              [Edge(11, 14, np.array([random.random(), random.random()])), Edge(11, 15, np.array([random.random(), random.random()])),
+#               Edge(12, 14, np.array([random.random(), random.random()])), Edge(12, 15, np.array([random.random(), random.random()])),
+#               Edge(13, 15, np.array([random.random(), random.random()]))]]
+
+a = [1, -12, 35]
 database_training = np.loadtxt('data.txt', dtype=int)
-net = Neural_network(list_Neural, list_Edge, [0.05, 0.05])
 
-list_mean_loss_x1 = []
-for i in range(1000):
-    after = net.training_x1(database_training)
-    list_mean_loss_x1.append(after)
+net = Neural_network(list_Neural, list_Edge, [0.05, 0.01])
 
-x = np.arange(0, 1000, 1)
-plt.plot(x, list_mean_loss_x1)
-plt.show()
+progress_training(net)
 
+# print(net.get_output(a))
+# net.training_x1(database_training)
+# print(net.get_output(a))
+# net.training_x2(database_training)
+# print(net.get_output(a))
+#
+# new_net = net.progress_training(k=100)
+#
+# print('actual x1 = ', net.get_output(a)[0], 'actual x2 = ', net.get_output(a)[1])
+# # print('best x1 = ', new_net.get_output(a)[0], 'best x2 = ', new_net.get_output(a)[1])
+# print('X1 = ', resolve_quadratic_equation(a)[0], 'X2 = ', resolve_quadratic_equation(a)[1])
 
 
 
