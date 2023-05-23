@@ -566,25 +566,34 @@ def progress_training(neural_net: Neural_network, condition=None, k=None):
     return Neural_network(list_neural_min, list_edges_min, new_learning_rate)
 
 
+def is_int(string):
+    try:
+        int(string)
+        return True
+    except ValueError:
+        return False
+
+
 def input_parameters():
     _a = input("a = ")
     _b = input("b = ")
     _c = input("c = ")
     while True:
-        if not _a.isdigit():
+        if not is_int(_a):
             print(f"a = {_a} not number!")
             _a = input("Number a = ")
-        if not _b.isdigit():
+        if not is_int(_b):
             print(f"b = {_b} not number!")
             _b = input("Number b = ")
-        if not _c.isdigit():
+        if not is_int(_c):
             print(f"c = {_c} not number!")
             _c = input("Number c = ")
-        if _a.isdigit() and _b.isdigit() and _c.isdigit():
+        if is_int(_a) and is_int(_b) and is_int(_c):
             _a = int(_a)
             _b = int(_b)
             _c = int(_c)
             break
+
     while True:
         if _a not in range(1, 11):
             print(f"Error! a = {_a} not in range [1, 10]!")
@@ -601,26 +610,26 @@ def input_parameters():
 
 
 
-list_Neural = [
-            [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(1, 4)],
-            [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(4, 6)],
-            [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(6, 8)]]
-list_Edge = [[Edge(1, 4, np.array([random.random()-0.5, random.random()-0.5])),
-              Edge(1, 5, np.array([random.random()-0.5, random.random()-0.5])),
-              Edge(2, 5, np.array([random.random()-0.5, random.random()-0.5])),
-              Edge(3, 4, np.array([random.random()-0.5, random.random()-0.5])),
-              Edge(3, 5, np.array([random.random()-0.5, random.random()-0.5]))],
-             [Edge(4, 6, np.array([random.random(), random.random()])),
-              Edge(5, 6, np.array([random.random(), random.random()])),
-              Edge(5, 7, np.array([random.random(), random.random()]))]]
+# list_Neural = [
+#             [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(1, 4)],
+#             [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(4, 6)],
+#             [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(6, 8)]]
+# list_Edge = [[Edge(1, 4, np.array([random.random()-0.5, random.random()-0.5])),
+#               Edge(1, 5, np.array([random.random()-0.5, random.random()-0.5])),
+#               Edge(2, 5, np.array([random.random()-0.5, random.random()-0.5])),
+#               Edge(3, 4, np.array([random.random()-0.5, random.random()-0.5])),
+#               Edge(3, 5, np.array([random.random()-0.5, random.random()-0.5]))],
+#              [Edge(4, 6, np.array([random.random(), random.random()])),
+#               Edge(5, 6, np.array([random.random(), random.random()])),
+#               Edge(5, 7, np.array([random.random(), random.random()]))]]
 
 # list_Neural = [[Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(1, 4)],
 #                [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(4, 8)],
 #                [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(8, 11)],
 #                [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(11, 13)]]
 #
-# list_Edge = [[Edge(1, 4, np.array([random.random() - 1, random.random() + 1])), Edge(1, 5, np.array([random.random() - 1, random.random() + 1])),
-#               Edge(1, 6, np.array([random.random() - 1, random.random() + 1])), Edge(2, 4, np.array([random.random(), random.random()])),
+# list_Edge = [[Edge(1, 4, np.array([random.random(), random.random()])), Edge(1, 5, np.array([random.random(), random.random()])),
+#               Edge(1, 6, np.array([random.random(), random.random()])), Edge(2, 4, np.array([random.random(), random.random()])),
 #               Edge(2, 6, np.array([random.random(), random.random()])), Edge(2, 7, np.array([random.random(), random.random()])),
 #               Edge(3, 5, np.array([random.random(), random.random()])), Edge(3, 6, np.array([random.random(), random.random()])),
 #               Edge(3, 7, np.array([random.random(), random.random()]))],
@@ -633,29 +642,29 @@ list_Edge = [[Edge(1, 4, np.array([random.random()-0.5, random.random()-0.5])),
 #               Edge(9, 12, np.array([random.random(), random.random()])), Edge(10, 11, np.array([random.random(), random.random()])),
 #               Edge(10, 12, np.array([random.random(), random.random()]))]]
 #
-# list_Neural = [[Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(1, 4)],
-#                [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(4, 7)],
-#                [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(7, 11)],
-#                [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(11, 14)],
-#                [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(14, 16)]]
-#
-# list_Edge = [[Edge(1, 4, np.array([random.random(), random.random()])), Edge(1, 5, np.array([random.random(), random.random()])),
-#               Edge(1, 6, np.array([random.random(), random.random()])), Edge(2, 4, np.array([random.random(), random.random()])),
-#               Edge(2, 6, np.array([random.random(), random.random()])), Edge(3, 4, np.array([random.random(), random.random()])),
-#               Edge(3, 5, np.array([random.random(), random.random()]))],
-#              [Edge(4, 7, np.array([random.random(), random.random()])), Edge(4, 8, np.array([random.random(), random.random()])),
-#               Edge(4, 9, np.array([random.random(), random.random()])), Edge(4, 10, np.array([random.random(), random.random()])),
-#               Edge(5, 7, np.array([random.random(), random.random()])), Edge(5, 8, np.array([random.random(), random.random()])),
-#               Edge(6, 7, np.array([random.random(), random.random()])), Edge(6, 8, np.array([random.random(), random.random()])),
-#               Edge(6, 9, np.array([random.random(), random.random()])), Edge(6, 10, np.array([random.random(), random.random()]))],
-#              [Edge(7, 11, np.array([random.random(), random.random()])), Edge(7, 12, np.array([random.random(), random.random()])),
-#               Edge(7, 13, np.array([random.random(), random.random()])), Edge(8, 11, np.array([random.random(), random.random()])),
-#               Edge(8, 12, np.array([random.random(), random.random()])), Edge(9, 11, np.array([random.random(), random.random()])),
-#               Edge(9, 12, np.array([random.random(), random.random()])), Edge(9, 13, np.array([random.random(), random.random()])),
-#               Edge(10, 12, np.array([random.random(), random.random()])), Edge(10, 13, np.array([random.random(), random.random()]))],
-#              [Edge(11, 14, np.array([random.random(), random.random()])), Edge(11, 15, np.array([random.random(), random.random()])),
-#               Edge(12, 14, np.array([random.random(), random.random()])), Edge(12, 15, np.array([random.random(), random.random()])),
-#               Edge(13, 15, np.array([random.random(), random.random()]))]]
+list_Neural = [[Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(1, 4)],
+               [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(4, 7)],
+               [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(7, 11)],
+               [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(11, 14)],
+               [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(14, 16)]]
+
+list_Edge = [[Edge(1, 4, np.array([random.random(), random.random()])), Edge(1, 5, np.array([random.random(), random.random()])),
+              Edge(1, 6, np.array([random.random(), random.random()])), Edge(2, 4, np.array([random.random(), random.random()])),
+              Edge(2, 6, np.array([random.random(), random.random()])), Edge(3, 4, np.array([random.random(), random.random()])),
+              Edge(3, 5, np.array([random.random(), random.random()]))],
+             [Edge(4, 7, np.array([random.random(), random.random()])), Edge(4, 8, np.array([random.random(), random.random()])),
+              Edge(4, 9, np.array([random.random(), random.random()])), Edge(4, 10, np.array([random.random(), random.random()])),
+              Edge(5, 7, np.array([random.random(), random.random()])), Edge(5, 8, np.array([random.random(), random.random()])),
+              Edge(6, 7, np.array([random.random(), random.random()])), Edge(6, 8, np.array([random.random(), random.random()])),
+              Edge(6, 9, np.array([random.random(), random.random()])), Edge(6, 10, np.array([random.random(), random.random()]))],
+             [Edge(7, 11, np.array([random.random(), random.random()])), Edge(7, 12, np.array([random.random(), random.random()])),
+              Edge(7, 13, np.array([random.random(), random.random()])), Edge(8, 11, np.array([random.random(), random.random()])),
+              Edge(8, 12, np.array([random.random(), random.random()])), Edge(9, 11, np.array([random.random(), random.random()])),
+              Edge(9, 12, np.array([random.random(), random.random()])), Edge(9, 13, np.array([random.random(), random.random()])),
+              Edge(10, 12, np.array([random.random(), random.random()])), Edge(10, 13, np.array([random.random(), random.random()]))],
+             [Edge(11, 14, np.array([random.random(), random.random()])), Edge(11, 15, np.array([random.random(), random.random()])),
+              Edge(12, 14, np.array([random.random(), random.random()])), Edge(12, 15, np.array([random.random(), random.random()])),
+              Edge(13, 15, np.array([random.random(), random.random()]))]]
 
 a = input_parameters()
 print(f"[a, b, c] = {a}")
