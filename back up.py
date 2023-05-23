@@ -566,6 +566,41 @@ def progress_training(neural_net: Neural_network, condition=None, k=None):
     return Neural_network(list_neural_min, list_edges_min, new_learning_rate)
 
 
+def input_parameters():
+    _a = input("a = ")
+    _b = input("b = ")
+    _c = input("c = ")
+    while True:
+        if not _a.isdigit():
+            print(f"a = {_a} not number!")
+            _a = input("Number a = ")
+        if not _b.isdigit():
+            print(f"b = {_b} not number!")
+            _b = input("Number b = ")
+        if not _c.isdigit():
+            print(f"c = {_c} not number!")
+            _c = input("Number c = ")
+        if _a.isdigit() and _b.isdigit() and _c.isdigit():
+            _a = int(_a)
+            _b = int(_b)
+            _c = int(_c)
+            break
+    while True:
+        if _a not in range(1, 11):
+            print(f"Error! a = {_a} not in range [1, 10]!")
+            _a = int(input("Retype a = "))
+        if _b not in range(-10, 1):
+            print(f"Error! b = {_b} not in range [-10, 0]!")
+            _b = int(input("Retype b = "))
+        if _c not in range(1, 10):
+            print(f"Error! c = {_c} not in range [1, 10]!")
+            _c = int(input("Retype c = "))
+        if _a in range(1, 11) and _b in range(-10, 1) and _c in range(1, 10):
+            break
+    return [_a, _b, _c]
+
+
+
 list_Neural = [
             [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(1, 4)],
             [Neural(i, np.array([0.0, 0.0]), np.array([random.random(), random.random()])) for i in range(4, 6)],
@@ -622,14 +657,9 @@ list_Edge = [[Edge(1, 4, np.array([random.random()-0.5, random.random()-0.5])),
 #               Edge(12, 14, np.array([random.random(), random.random()])), Edge(12, 15, np.array([random.random(), random.random()])),
 #               Edge(13, 15, np.array([random.random(), random.random()]))]]
 
-# a = [1, -12, 35]
-#a = [1, -3, 2]
-# a = [0, 0, 0]
-
-a = np.loadtxt('a.txt', dtype=int)
-# a[0]=int(a[0])
-# a[1]=int(a[1])
-# a[2]=int(a[2])
+a = input_parameters()
+print(f"[a, b, c] = {a}")
+# a = np.loadtxt('a.txt', dtype=int)
 database_training = np.loadtxt('data.txt', dtype=int)
 
 
@@ -640,17 +670,7 @@ min_network = progress_training(net, k=100)
 print(f"Последний результат: {net.get_output(a)}")
 print(f"Лучщий результат: {min_network.get_output(a)}")
 
-# print(net.get_output(a))
-# net.training_x1(database_training)
-# print(net.get_output(a))
-# net.training_x2(database_training)
-# print(net.get_output(a))
-#
-# new_net = net.progress_training(k=100)
-#
-# print('actual x1 = ', net.get_output(a)[0], 'actual x2 = ', net.get_output(a)[1])
-# # print('best x1 = ', new_net.get_output(a)[0], 'best x2 = ', new_net.get_output(a)[1])
-# print('X1 = ', resolve_quadratic_equation(a)[0], 'X2 = ', resolve_quadratic_equation(a)[1])
+
 
 
 
